@@ -27,8 +27,11 @@ CREATE TABLE IF NOT EXISTS schedules (
 CREATE TABLE IF NOT EXISTS schedules_stops (
 	id serial PRIMARY KEY,
 	schedule_id integer REFERENCES schedules ON DELETE CASCADE NOT NULL,
-	stop_id integer REFERENCES stops NOT NULL,
+	name text NOT NULL,
 	arrival_time time NOT NULL,
+	description text,
+	created timestamp with time zone NOT NULL DEFAULT now(),
+	updated timestamp with time zone NOT NULL DEFAULT now(),
 	"order" integer NOT NULL,
 	UNIQUE (schedule_id, "order")
 );`
@@ -170,16 +173,15 @@ func (ss *ScheduleService) ModifySchedule(schedule *shuttletracker.Schedule) err
 // create schedule stops?
 
 func (ss *ScheduleService) CreateScheduleStop(stop *shuttletracker.ScheduleStop) error {
-	statement := "INSERT INTO schedules_stops (name, description, arrival_time) VALUES" +
-		" ($1, $2, $3) RETURNING id, created, updated;"
+	statement := "INSERT INTO schedules_stops (name, schedule_id, arrival_time, description) VALUES" +
+		" ($1, $2, $3, $4) RETURNING id, created, updated;"
 	row := ss.db.QueryRow(statement, stop.Name, stop.Description, stop.ArrivalTime)
 	return row.Scan(&stop.ID, &stop.Created, &stop.Updated)
 }
 
-
 func (ss *ScheduleService) ScheduleStops() ([]*shuttletracker.ScheduleStop, error) {
 	stops := []*shuttletracker.ScheduleStop{}
-	query := "SELECT s.id, s.name, s.created, s.updated, s.description, s.arrival_time" +
+	query := "SELECT s.id, s.schedule_id, s.name, s.arrival_time, s.created, s.updated" +
 		" FROM schedules_stops s;"
 	rows, err := ss.db.Query(query)
 	if err != nil {
@@ -187,7 +189,7 @@ func (ss *ScheduleService) ScheduleStops() ([]*shuttletracker.ScheduleStop, erro
 	}
 	for rows.Next() {
 		s := &shuttletracker.ScheduleStop{}
-		err := rows.Scan(&s.ID, &s.Name, &s.Created, &s.Updated, &s.Description, &s.ArrivalTime)
+		err := rows.Scan(&s.ID, &s.ScheduleID, &s.Name, &s.ArrivalTime, &s.Created, &s.Updated)
 		if err != nil {
 			return nil, err
 		}

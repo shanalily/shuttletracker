@@ -18,12 +18,11 @@ type Schedule struct {
 
 // I need to have the name/time of the stops
 type ScheduleStop struct {
-	ID 			int64	  `json:"id"`
-	ScheduleID 	int64	  `json:"schedule_id"`
-	StopID 		int64	  `json:"stop_id"` // get rid of this
+	ID          int64     `json:"id"`
+	ScheduleID 	int64     `json:"schedule_id"`
 	ArrivalTime time.Time `json:"arrival_time"`
-	Name 		string	  `json:"name"`
-	Description *string	  `json:"description"`
+	Name 		string    `json:"name"`
+	Description *string   `json:"description"`
 	Created   time.Time   `json:"created"`
 	Updated   time.Time   `json:"updated"`
 }
