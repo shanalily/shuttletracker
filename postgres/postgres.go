@@ -8,7 +8,7 @@ import (
 
 /*
 Postgres implements shuttletracker.VehicleService, shuttletracker.RouteService,
-shuttletracker.LoctionService, and shuttletracker.MessageService.
+shuttletracker.LoctionService, shuttletracker.MessageService, and shuttletracker.ScheduleService.
 */
 type Postgres struct {
 	VehicleService
@@ -17,6 +17,7 @@ type Postgres struct {
 	LocationService
 	MessageService
 	UserService
+	ScheduleService
 }
 
 // Config contains database connection information.
@@ -59,6 +60,10 @@ func New(cfg Config) (*Postgres, error) {
 		return nil, err
 	}
 	err = pg.UserService.initializeSchema(db)
+	if err != nil {
+		return nil, err
+	}
+	err = pg.ScheduleService.initializeSchema(db)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+
+	"github.com/wtg/shuttletracker"
 )
 
 // ScheduleService implements shuttletracker.ScheduleService.
@@ -22,11 +24,11 @@ CREATE TABLE IF NOT EXISTS schedules (
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	updated timestamp with time zone NOT NULL DEFAULT now()
 );
-CREATE TABLE IF NOT EXISTS schedule_stops (
+CREATE TABLE IF NOT EXISTS schedules_stops (
 	id serial PRIMARY KEY,
 	schedule_id integer REFERENCES schedules ON DELETE CASCADE NOT NULL,
 	stop_id integer REFERENCES stops NOT NULL,
-	arrival_time time,
+	arrival_time time NOT NULL,
 	"order" integer NOT NULL,
 	UNIQUE (schedule_id, "order")
 );`
@@ -34,9 +36,11 @@ CREATE TABLE IF NOT EXISTS schedule_stops (
 	return err
 }
 
+// might get rid of left join because I need ss.arrival time
+// Schedules returns all Schedules in the database
 func (ss *ScheduleService) Schedules() ([]*shuttletracker.Schedule, error) {
 	schedules := []*shuttletracker.Schedule{}
-	query := "SELECT s.id, s.name, s.created, s.updated," +
+	query := "SELECT s.id, s.name, s.created, s.updated, ss.arrival_time," +
 		" array_remove(array_agg(ss.stop_id ORDER BY ss.order ASC), NULL) as stop_ids" +
 		" FROM schedules s LEFT JOIN schedules_stops ss" +
 		" ON s.id = ss.schedule_id GROUP BY s.id;"
@@ -56,9 +60,10 @@ func (ss *ScheduleService) Schedules() ([]*shuttletracker.Schedule, error) {
 	return schedules, nil
 }
 
-//  Schedule returns the Schedule with the provided name.
-func (ss *ScheduleService) Schedule(name string) (*shuttletracker.Schedule, error) {
-	query := "SELECT s.name, s.created, s.updated," +
+// it's a left join but I want to be able to get ss.arrival_time...
+// Schedule returns the Schedule with the provided ID (might change to name).
+func (ss *ScheduleService) Schedule(id int64) (*shuttletracker.Schedule, error) {
+	query := "SELECT s.name, s.created, s.updated, ss.arrival_time," +
 		" array_remove(array_agg(rs.stop_id ORDER BY rs.order ASC), NULL) as stop_ids" +
 		" FROM schedules s LEFT JOIN schedules_stops ss" +
 		" ON s.id = ss.schedule_id WHERE s.id = $1 GROUP BY s.id;"
@@ -74,7 +79,7 @@ func (ss *ScheduleService) Schedule(name string) (*shuttletracker.Schedule, erro
 }
 
 // CreateSchedule creates a Schedule.
-func (rs *ScheduleService) CreateSchedule(schedule *shuttletracker.Schedule) error {
+func (ss *ScheduleService) CreateSchedule(schedule *shuttletracker.Schedule) error {
 	tx, err := ss.db.Begin()
 	if err != nil {
 		return err
@@ -160,4 +165,51 @@ func (ss *ScheduleService) ModifySchedule(schedule *shuttletracker.Schedule) err
 	// }
 
 	return tx.Commit()
+}
+
+// create schedule stops?
+
+func (ss *ScheduleService) CreateScheduleStop(stop *shuttletracker.ScheduleStop) error {
+	statement := "INSERT INTO schedules_stops (name, description, arrival_time) VALUES" +
+		" ($1, $2, $3) RETURNING id, created, updated;"
+	row := ss.db.QueryRow(statement, stop.Name, stop.Description, stop.ArrivalTime)
+	return row.Scan(&stop.ID, &stop.Created, &stop.Updated)
+}
+
+
+func (ss *ScheduleService) ScheduleStops() ([]*shuttletracker.ScheduleStop, error) {
+	stops := []*shuttletracker.ScheduleStop{}
+	query := "SELECT s.id, s.name, s.created, s.updated, s.description, s.arrival_time" +
+		" FROM schedules_stops s;"
+	rows, err := ss.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		s := &shuttletracker.ScheduleStop{}
+		err := rows.Scan(&s.ID, &s.Name, &s.Created, &s.Updated, &s.Description, &s.ArrivalTime)
+		if err != nil {
+			return nil, err
+		}
+		stops = append(stops, s)
+	}
+	return stops, nil
+}
+
+func (ss *ScheduleService) DeleteScheduleStop(id int64) error {
+	statement := "DELETE FROM schedules_stops WHERE id = $1;"
+	result, err := ss.db.Exec(statement, id)
+	if err != nil {
+		return err
+	}
+
+	n, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return shuttletracker.ErrScheduleStopNotFound
+	}
+
+	return nil
 }
