@@ -483,6 +483,39 @@ Vue.component('about-modal', {
   }
 });
 
+// can I use the same component for every schedule?
+// I will try to make this work for East Monday-Thursday first and then extend
+// I'm missing time in the route_stop table
+Vue.component('shuttle-schedule', {
+  template: `
+  <div class="modal">
+  <div class="modalContent">
+    <span class="close" @click="$emit('hidemodal')">&times;<span>
+    <h2>Monday-Friday East Route Schedule</h2>
+  </div>
+  </div>`,
+  mounted() {
+    this.getSchedules()
+  },
+  data() {
+    return {
+
+    }
+  },
+  methods: {
+    toggleModal: function() {
+      $(".modal").toggle();
+    },
+    // or do I just want to grab from routes?
+    getSchedules: function () {
+      $.get("/schedules", this.setSchedule).fail(function () { scheduleSuccess = false; });
+    },
+    setSchedule: function() {
+
+    }
+  }
+});
+
 Vue.component('dropdown-menu', {
   template: `
 <div class="dropdown" >
@@ -700,7 +733,6 @@ Vue.component('dropdown-menu', {
 });
 
 Vue.component('title-bar', {
-
   template: `
   <div class="titleBar" style="filter: invert(0)" >
     <!-- left side of tile bar -->

@@ -104,6 +104,16 @@ func New(cfg Config, ms shuttletracker.ModelService, msg shuttletracker.MessageS
 		})
 	})
 
+	// Schedules
+	// r.Route("/schedules", func(r chi.Router) {
+	// 	r.Get("/", api.SchedulesHandler)
+	// 	r.Group(func(r chi.Router) {
+	// 		r.Use(cli.casauth)
+	// 		r.Post("/create", api.SchedulesCreateHandler)
+	// 		r.Delete("/", api.SchedulesDeleteHandler)
+	// 	})
+	// })
+
 	r.Get("/logout/", cli.logout)
 	// Admin
 	r.Route("/admin", func(r chi.Router) {
