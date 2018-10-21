@@ -104,6 +104,10 @@ func New(cfg Config, ms shuttletracker.ModelService, msg shuttletracker.MessageS
 		})
 	})
 
+	r.Route("/schedules", func(r chi.Router) {
+		r.Get("/", api.SchedulesHandler)
+	})
+
 	r.Get("/logout/", cli.logout)
 	// Admin
 	r.Route("/admin", func(r chi.Router) {
