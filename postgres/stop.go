@@ -73,3 +73,8 @@ func (ss *StopService) DeleteStop(id int64) error {
 
 	return nil
 }
+
+// ScheduleStops returns all ScheduleStops.
+func (sss *StopService) ScheduleStops() ([]*shuttletracker.ScheduleStop, error) {
+	return []*shuttletracker.ScheduleStop{}, nil
+}
