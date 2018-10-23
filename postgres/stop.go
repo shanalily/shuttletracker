@@ -75,6 +75,20 @@ func (ss *StopService) DeleteStop(id int64) error {
 }
 
 // ScheduleStops returns all ScheduleStops.
-func (sss *StopService) ScheduleStops() ([]*shuttletracker.ScheduleStop, error) {
+func (ss *StopService) ScheduleStops() ([]*shuttletracker.ScheduleStop, error) {
 	return []*shuttletracker.ScheduleStop{}, nil
+}
+
+// use to insert json from parsed excel file
+func (ss *StopService) InsertScheduleStops(stops []interface{}) {
+	// unmarshal data into map[string]interface{}
+	// m := []interface{}{}
+	// err := json.Unmarshal(data, &m)
+
+	// for i, entry := range stops {
+		//     find stop name in stops and set stop_id foreign key
+		//     set schedule name
+		//     set time
+		//     make sure it gets inserted into the database
+	// }
 }
