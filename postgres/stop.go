@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/wtg/shuttletracker"
 )
@@ -86,21 +87,87 @@ func (ss *StopService) DeleteStop(id int64) error {
 	return nil
 }
 
-// ScheduleStops returns all ScheduleStops associated with one schedule.
-func (ss *StopService) ScheduleStops(id int64) ([]*shuttletracker.ScheduleStop, error) {
-	return []*shuttletracker.ScheduleStop{}, nil
+
+
+// CreateStop creates a ScheduleStop.
+func (ss *StopService) CreateScheduleStop(stop *shuttletracker.ScheduleStop) error {
+	statement := "INSERT INTO schedule_times (schedule_id, stop_id, time) VALUES" +
+		" ($1, $2, $3) RETURNING id;"
+	row := ss.db.QueryRow(statement, stop.ScheduleID, stop.StopID, stop.Time)
+	return row.Scan(&stop.ID)
 }
 
-// use to insert json from parsed excel file
-func (ss *StopService) InsertScheduleStops(stops []interface{}) {
-	// unmarshal data into map[string]interface{}
-	// m := []interface{}{}
-	// err := json.Unmarshal(data, &m)
+// ScheduleStops returns all ScheduleStops associated with one schedule.
+func (ss *StopService) ScheduleStops(schedule_id int64) ([]*shuttletracker.ScheduleStop, error) {
+	// what about finding all schedule stop ids, then for each id find all stops associated so that
+	// I can group them together by schedule in JSON output?
+	stops := []*shuttletracker.ScheduleStop{}
+	query := "SELECT st.id, r.name, s.name, st.time " +
+		"FROM schedules r, stops s, schedule_times st " +
+		"WHERE s.id = st.stop_id AND r.id = st.schedule_id and r.id = $1;"
+	rows, err := ss.db.Query(query, schedule_id)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		s := &shuttletracker.ScheduleStop{}
 
-	// for i, entry := range stops {
-		//     find stop name in stops and set stop_id foreign key
-		//     set schedule name
-		//     set time
-		//     make sure it gets inserted into the database
-	// }
+		err := rows.Scan(&s.ID, &s.ScheduleName, &s.StopName, &s.Time)
+		fmt.Println(convertTime(s.Time))
+		if err != nil {
+			return nil, err
+		}
+		stops = append(stops, s)
+	}
+	return stops, nil
+}
+
+// StopTimes returns all ScheduleStops associated with one stop.
+func (ss *StopService) StopTimes(stop_id int64) ([]*shuttletracker.ScheduleStop, error) {
+	// specify current day/time and get next few stops? It depends on what the frontend people need
+	stops := []*shuttletracker.ScheduleStop{}
+	query := "SELECT st.id, r.name, s.name, st.time " +
+		"FROM schedules r, stops s, schedule_times st " +
+		"WHERE st.schedule_id = r.id and st.stop_id = s.id and st.stop_id = $1;"
+	rows, err := ss.db.Query(query, stop_id)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		s := &shuttletracker.ScheduleStop{}
+
+		err := rows.Scan(&s.ID, &s.ScheduleName, &s.StopName, &s.Time)
+		fmt.Println(convertTime(s.Time))
+		if err != nil {
+			return nil, err
+		}
+		stops = append(stops, s)
+	}
+	return stops, nil
+}
+
+// DeleteStop deletes a ScheduleStop.
+func (ss *StopService) DeleteScheduleStop(id int64) error {
+	statement := "DELETE FROM schedule_times WHERE id = $1;"
+	result, err := ss.db.Exec(statement, id)
+	if err != nil {
+		return err
+	}
+
+	n, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return shuttletracker.ErrStopNotFound
+	}
+
+	return nil
+}
+
+// not needed here, should probably be somewhere else?
+func convertTime(time int) string {
+	hour := time / 60
+	minute := time % 60
+	return fmt.Sprintf("%d:%d", hour, minute)
 }

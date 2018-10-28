@@ -35,6 +35,8 @@ type StopService interface {
 	DeleteStop(id int64) error
 
 	ScheduleStops(id int64) ([]*ScheduleStop, error)
+	CreateScheduleStop(stop *ScheduleStop) error
+	DeleteScheduleStop(id int64) error
 }
 
 // ErrStopNotFound indicates that a Stop is not in the service.
