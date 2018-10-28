@@ -22,6 +22,18 @@ CREATE TABLE IF NOT EXISTS stops (
 	longitude double precision NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	updated timestamp with time zone NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS schedules (
+	id serial PRIMARY KEY,
+	name text NOT NULL,
+	weekend boolean NOT NULL,
+	west boolean NOT NULL
+);
+CREATE TABLE IF NOT EXISTS schedule_times (
+	id serial PRIMARY KEY,
+	schedule_id integer REFERENCES schedules NOT NULL,
+	stop_id integer REFERENCES stops NOT NULL,
+	time integer NOT NULL
 );`
 	_, err := ss.db.Exec(schema)
 	return err
@@ -74,8 +86,8 @@ func (ss *StopService) DeleteStop(id int64) error {
 	return nil
 }
 
-// ScheduleStops returns all ScheduleStops.
-func (ss *StopService) ScheduleStops() ([]*shuttletracker.ScheduleStop, error) {
+// ScheduleStops returns all ScheduleStops associated with one schedule.
+func (ss *StopService) ScheduleStops(id int64) ([]*shuttletracker.ScheduleStop, error) {
 	return []*shuttletracker.ScheduleStop{}, nil
 }
 

@@ -19,7 +19,10 @@ type Stop struct {
 }
 
 type ScheduleStop struct {
-	// Justin's schema goes here
+	ID         int64 `json:"id"`
+	ScheduleID int64 `json:"schedule_id"`
+	StopID     int64 `json:"stop_id"`
+	Time       int   `json:"time"`
 }
 
 // StopService is an interface for interacting with Stops.
@@ -28,7 +31,7 @@ type StopService interface {
 	CreateStop(stop *Stop) error
 	DeleteStop(id int64) error
 
-	ScheduleStops() ([]*ScheduleStop, error)
+	ScheduleStops(id int64) ([]*ScheduleStop, error)
 }
 
 // ErrStopNotFound indicates that a Stop is not in the service.
