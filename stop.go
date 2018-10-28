@@ -23,6 +23,9 @@ type ScheduleStop struct {
 	ScheduleID int64 `json:"schedule_id"`
 	StopID     int64 `json:"stop_id"`
 	Time       int   `json:"time"`
+
+	ScheduleName *string
+	StopName     *string
 }
 
 // StopService is an interface for interacting with Stops.
