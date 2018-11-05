@@ -1,0 +1,77 @@
+[
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Union",
+		"time": "7:00a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Tibbits Ave",
+		"time": "7:03a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Colonie",
+		"time": "7:09a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Brinsmade",
+		"time": "7:12a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Sunset 1 & 2",
+		"time": "7:13a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "E-Lot",
+		"time": "7:15a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "B-Lot",
+		"time": "7:16a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "13th / Peoples",
+		"time": "7:18a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "8th / Sage",
+		"time": "7:19a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "West lot",
+		"time": "7:20a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Sage",
+		"time": "7:21a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Union",
+		"time": "7:23a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Union",
+		"time": "7:20a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "Tibbits Ave",
+		"time": "7:23a"
+	},
+	{
+		"name": "Monday - Thursday East Route",
+		"stop_name": "B-Lot",
+		"time": "7:26a"
+	}
+]
