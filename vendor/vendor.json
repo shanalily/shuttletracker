@@ -7,6 +7,12 @@
 			"revision": ""
 		},
 		{
+			"checksumSHA1": "2WtE6sNa6ErZll2yZnav5Xwidjw=",
+			"path": "github.com/360EntSecGroup-Skylar/excelize",
+			"revision": "30122d0346dc751b01c9865af3febb1f99e1f5e0",
+			"revisionTime": "2018-10-30T02:30:20Z"
+		},
+		{
 			"checksumSHA1": "SdEcxwaW92m0H3pao3BPj2ZpvaU=",
 			"path": "github.com/Sirupsen/logrus",
 			"revision": "446d1c146faa8ed3f4218f056fcd165f6bcfda81",
@@ -125,6 +131,12 @@
 			"path": "github.com/mitchellh/mapstructure",
 			"revision": "d0303fe809921458f417bcf828397a65db30a7e4",
 			"revisionTime": "2017-05-23T03:00:23Z"
+		},
+		{
+			"checksumSHA1": "2jsbDTvwxafPp7FJjJ8IIFlTLjs=",
+			"path": "github.com/mohae/deepcopy",
+			"revision": "c48cc78d482608239f6c4c92a4abd87eb8761c90",
+			"revisionTime": "2017-09-29T03:49:55Z"
 		},
 		{
 			"checksumSHA1": "zZg0J0MqvnqXVYo644QDvnUinrc=",
