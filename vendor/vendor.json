@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "/ocEzvFb/oFKl5hwVcYpOhmDYXk=",
+			"path": "github.com/360EntSecGroup-Skylar/excelize",
+			"revision": "2aca340f5d8358828f2d6c889d50fd34693ecfe7",
+			"revisionTime": "2018-11-04T15:28:39Z"
+		},
+		{
 			"checksumSHA1": "SdEcxwaW92m0H3pao3BPj2ZpvaU=",
 			"path": "github.com/Sirupsen/logrus",
 			"revision": "446d1c146faa8ed3f4218f056fcd165f6bcfda81",
@@ -232,5 +238,5 @@
 			"revisionTime": "2017-04-07T17:21:22Z"
 		}
 	],
-	"rootPath": "shuttletracker"
+	"rootPath": "github.com/wtg/shuttletracker"
 }

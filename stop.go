@@ -35,6 +35,7 @@ type StopService interface {
 	DeleteStop(id int64) error
 
 	ScheduleStops(id int64) ([]*ScheduleStop, error)
+	StopTimes(stop_id int64, schedule_id int64, departure_time int64, entries int64) ([]*ScheduleStop, error)
 	CreateScheduleStop(stop *ScheduleStop) error
 	DeleteScheduleStop(id int64) error
 }

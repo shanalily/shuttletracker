@@ -6,7 +6,7 @@ insert into stops (id, latitude, longitude, name, description) values
 insert into schedules (id, name, weekend, west) values (1, 'Monday - Thursday East Route', 'f', 'f');
 
 insert into schedule_times (schedule_id, stop_id, time) values
-	(1, 1, 420), (1, 19, 423), (1, 14, 429);
+	(1, 1, 420), (1, 19, 423), (1, 14, 429), (1, 1, 440), (1, 1, 443);
 
 SELECT
 	st.id,
@@ -34,4 +34,9 @@ FROM
 WHERE
 	st.schedule_id = r.id
 	and st.stop_id = s.id
-	and st.stop_id = 1;
+	and st.schedule_id = 1
+	and st.stop_id = 1
+	and st.time >= 440
+ORDER BY
+	st.time ASC
+LIMIT 1;
