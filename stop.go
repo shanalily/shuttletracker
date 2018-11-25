@@ -19,13 +19,14 @@ type Stop struct {
 }
 
 type ScheduleStop struct {
-	ID         int64 `json:"id"`
-	ScheduleID int64 `json:"schedule_id"`
-	StopID     int64 `json:"stop_id"`
-	Time       int   `json:"time"`
+	ID          int64 `json:"id"`
+	ScheduleID  int64 `json:"schedule_id"`
+	StopID      int64 `json:"stop_id"`
+	Time        int   `json:"time"`
+	DropOffOnly bool  `json:"drop_off_only"`
 
-	ScheduleName *string
-	StopName     *string
+	ScheduleName *string `json:"schedule_name"`
+	StopName     *string `json:"stop_name"`
 }
 
 // StopService is an interface for interacting with Stops.
@@ -34,7 +35,8 @@ type StopService interface {
 	CreateStop(stop *Stop) error
 	DeleteStop(id int64) error
 
-	ScheduleStops(id int64) ([]*ScheduleStop, error)
+	AllScheduleStops() ([]*ScheduleStop, error)
+	ScheduleStops(schedule_id int64) ([]*ScheduleStop, error)
 	StopTimes(stop_id int64, schedule_id int64, departure_time int64, entries int64) ([]*ScheduleStop, error)
 	CreateScheduleStop(stop *ScheduleStop) error
 	DeleteScheduleStop(id int64) error

@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS stops (
 );
 CREATE TABLE IF NOT EXISTS schedules (
 	id serial PRIMARY KEY,
-	name text NOT NULL,
+	name text UNIQUE NOT NULL,
 	weekend boolean NOT NULL,
 	west boolean NOT NULL
 );
@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS schedule_times (
 	schedule_id integer REFERENCES schedules NOT NULL,
 	stop_id integer REFERENCES stops NOT NULL,
 	time integer NOT NULL,
+	drop_off_only boolean DEFAULT 'f',
 	UNIQUE (schedule_id, stop_id, time)
 );`
 	_, err := ss.db.Exec(schema)
@@ -93,18 +94,40 @@ func (ss *StopService) DeleteStop(id int64) error {
 // CreateStop creates a ScheduleStop.
 func (ss *StopService) CreateScheduleStop(stop *shuttletracker.ScheduleStop) error {
 	// assume ScheduleStop has stop name and schedule name set instead of schedule_id and stop_id?
-	statement := "INSERT INTO schedule_times (schedule_id, stop_id, time) VALUES" +
-		" ($1, $2, $3) RETURNING id;"
+	// should I check here there there is a corresponding stop name? Query for stop.StopName being a
+	// substring of a stop in stops table (LIKE '%' || s.name || '%')
+	statement := "INSERT INTO schedule_times (schedule_id, stop_id, time, drop_off_only) VALUES" +
+		" ($1, $2, $3, $4) RETURNING id;"
 	row := ss.db.QueryRow(statement, stop.ScheduleID, stop.StopID, stop.Time)
 	return row.Scan(&stop.ID)
 }
 
+// AllScheduleStops returns all ScheduleStops for every schedule.
+func (ss *StopService) AllScheduleStops() ([]*shuttletracker.ScheduleStop, error) {
+	stops := []*shuttletracker.ScheduleStop{}
+	query := "SELECT st.id, r.id, r.name, s.id, s.name, st.time " +
+		"FROM schedules r, stops s, schedule_times st " +
+		"WHERE s.id = st.stop_id AND r.id = st.schedule_id;"
+	rows, err := ss.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		s := &shuttletracker.ScheduleStop{}
+
+		err := rows.Scan(&s.ID, &s.ScheduleID, &s.ScheduleName, &s.StopID, &s.StopName, &s.Time)
+		if err != nil {
+			return nil, err
+		}
+		stops = append(stops, s)
+	}
+	return stops, nil
+}
+
 // ScheduleStops returns all ScheduleStops associated with one schedule.
 func (ss *StopService) ScheduleStops(schedule_id int64) ([]*shuttletracker.ScheduleStop, error) {
-	// what about finding all schedule stop ids, then for each id find all stops associated so that
-	// I can group them together by schedule in JSON output?
 	stops := []*shuttletracker.ScheduleStop{}
-	query := "SELECT st.id, r.name, s.name, st.time " +
+	query := "SELECT st.id, r.id, r.name, s.id, s.name, st.time " +
 		"FROM schedules r, stops s, schedule_times st " +
 		"WHERE s.id = st.stop_id AND r.id = st.schedule_id and r.id = $1;"
 	rows, err := ss.db.Query(query, schedule_id)
@@ -114,8 +137,7 @@ func (ss *StopService) ScheduleStops(schedule_id int64) ([]*shuttletracker.Sched
 	for rows.Next() {
 		s := &shuttletracker.ScheduleStop{}
 
-		err := rows.Scan(&s.ID, &s.ScheduleName, &s.StopName, &s.Time)
-		// fmt.Println(convertTime(s.Time))
+		err := rows.Scan(&s.ID, &s.ScheduleID, &s.ScheduleName, &s.StopID, &s.StopName, &s.Time)
 		if err != nil {
 			return nil, err
 		}
@@ -129,9 +151,9 @@ func (ss *StopService) ScheduleStops(schedule_id int64) ([]*shuttletracker.Sched
 func (ss *StopService) StopTimes(stop_id int64, schedule_id int64, departure_time int64, entries int64) ([]*shuttletracker.ScheduleStop, error) {
 	// specify current day/time and get next few stops? It depends on what the frontend people need
 	stops := []*shuttletracker.ScheduleStop{}
-	query := "SELECT st.id, r.name, s.name, st.time " +
+	query := "SELECT st.id, r.id, r.name, s.id, s.name, st.time " +
 		"FROM schedules r, stops s, schedule_times st " +
-		"WHERE st.schedule_id = r.id and st.stop_id = s.id and st.stop_id = $1 and st.schedule_id = $2 and st.time >= $3" + 
+		"WHERE st.schedule_id = r.id and st.stop_id = s.id and st.stop_id = $1 and st.schedule_id = $2 and st.time >= $3 and st.drop_off_only = 'f' " + 
 		"ORDER BY st.time ASC " +
 		"LIMIT $4;"
 	rows, err := ss.db.Query(query, stop_id, schedule_id, departure_time, entries)
@@ -141,7 +163,7 @@ func (ss *StopService) StopTimes(stop_id int64, schedule_id int64, departure_tim
 	for rows.Next() {
 		s := &shuttletracker.ScheduleStop{}
 
-		err := rows.Scan(&s.ID, &s.ScheduleName, &s.StopName, &s.Time)
+		err := rows.Scan(&s.ID, &s.ScheduleID, &s.ScheduleName, &s.StopID, &s.StopName, &s.Time)
 		fmt.Println(convertTime(s.Time))
 		if err != nil {
 			return nil, err

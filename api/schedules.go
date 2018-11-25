@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-// can I specify which schedule I want in the url? like schedules?schedule_id=1
+// example url: http://localhost:8080/schedules/?schedule_id=1&stop_id=1&departure_time=420&entries=3
 func (api *API) SchedulesHandler(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	base := 10
@@ -23,39 +23,45 @@ func (api *API) SchedulesHandler(w http.ResponseWriter, r *http.Request) {
 			log.WithError(err).Error("invalid schedule_id")
 			return
 		}
-		fmt.Println(schedule_id)
-	}
-
-	if val, ok := params["stop_id"]; ok {
-		// check that departure time and number of entries are also set
-		stop_id, err = strconv.ParseInt(val[0], base, int_type)
-		if err != nil {
-			log.WithError(err).Error("invalid stop_id")
-			return
-		}
-		// should these parameters be optional?
-		// default departure time could be now, default limit could 1 or everything (somehow)
-		if val, ok := params["departure_time"]; ok {
-			departure_time, err = strconv.ParseInt(val[0], base, int_type)
+		if val, ok := params["stop_id"]; ok {
+			// check that departure time and number of entries are also set
+			stop_id, err = strconv.ParseInt(val[0], base, int_type)
+			if err != nil {
+				log.WithError(err).Error("invalid stop_id")
+				return
+			}
+			// should these parameters be optional?
+			// default departure time could be now, default limit could 1 or everything (somehow)
+			if val, ok := params["departure_time"]; ok {
+				departure_time, err = strconv.ParseInt(val[0], base, int_type)
+			} else {
+				log.WithError(err).Error("invalid departure_time")
+				return
+			}
+			if val, ok := params["entries"]; ok {
+				entries, err = strconv.ParseInt(val[0], base, int_type)
+			} else {
+				log.WithError(err).Error("invalid entries")
+				return
+			}
+			stops, err := api.ms.StopTimes(stop_id, schedule_id, departure_time, entries)
+			if err != nil {
+				log.WithError(err).Error("unable to get stops")
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			WriteJSON(w, stops)
 		} else {
-			log.WithError(err).Error("invalid departure_time")
-			return
+			schedules, err := api.ms.ScheduleStops(schedule_id)
+			if err != nil {
+				log.WithError(err).Error("unable to get schedule")
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			WriteJSON(w, schedules)
 		}
-		if val, ok := params["entries"]; ok {
-			entries, err = strconv.ParseInt(val[0], base, int_type)
-		} else {
-			log.WithError(err).Error("invalid entries")
-			return
-		}
-		stops, err := api.ms.StopTimes(stop_id, schedule_id, departure_time, entries)
-		if err != nil {
-			log.WithError(err).Error("unable to get stops")
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		WriteJSON(w, stops)
 	} else {
-		schedules, err := api.ms.ScheduleStops(schedule_id) // 1 for now
+		schedules, err := api.ms.AllScheduleStops()
 		if err != nil {
 			log.WithError(err).Error("unable to get schedule")
 			http.Error(w, err.Error(), http.StatusInternalServerError)
