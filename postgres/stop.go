@@ -194,7 +194,38 @@ func (ss *StopService) DeleteScheduleStop(id int64) error {
 
 // not needed here, should probably be somewhere else?
 func convertTime(time int) string {
-	hour := time / 60
-	minute := time % 60
-	return fmt.Sprintf("%d:%d", hour, minute)
+	
+	//between 12:00 am and 12:59 am
+	if time > 0 && time < 60 {
+		hour := 12
+		minute := time % 60
+		return fmt.Sprintf("%d:%d", hour, minute, "am")
+	}
+
+	//between 1 am and 11:59 am
+	if time > 60 && time < 719 {
+		hour := time / 60
+		minute := time % 60
+		return fmt.Sprintf("%d:%d", hour, minute, "am")
+	}
+
+	//between noon and 12:59 pm
+	if time > 720 && time < 779 {
+		hour := time / 60
+		minute := time % 60
+		return fmt.Sprintf("%d:%d", hour, minute, "pm")
+	}
+
+	//between 1 pm and 11:59 pm
+	if time > 780 && time < 1439 {
+		int new_time := time - 720
+		hour := new_time / 60
+		minute := new_time % 60
+		return fmt.Sprintf("%d:%d", hour, minute, "pm")
+	}
+
+	//error handling?
+	else {
+		return fmt.Sprintf("%d:%d", hour, minute)
+	}
 }
