@@ -223,6 +223,7 @@ func convertTime(time int) string {
 		minute := new_time % 60
 		return fmt.Sprintf("%d:%d", hour, minute, "pm")
 	} 
+	// this thing does not compile you were returning variables that do not exist
 	// else {
 	// 	return fmt.Sprintf("%d:%d", hour, minute)
 	// }
