@@ -218,14 +218,13 @@ func convertTime(time int) string {
 
 	//between 1 pm and 11:59 pm
 	if time > 780 && time < 1439 {
-		int new_time := time - 720
+		new_time := time - 720
 		hour := new_time / 60
 		minute := new_time % 60
 		return fmt.Sprintf("%d:%d", hour, minute, "pm")
-	}
-
-	//error handling?
-	else {
-		return fmt.Sprintf("%d:%d", hour, minute)
-	}
+	} 
+	// else {
+	// 	return fmt.Sprintf("%d:%d", hour, minute)
+	// }
+	return fmt.Sprintf("Make this work!")
 }
