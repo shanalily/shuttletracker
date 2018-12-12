@@ -259,11 +259,11 @@ func ReadDefault() {
 
 // reads an excel file from a specified link
 func ReadLink(FileLink string) {
-    fileUrl := link 
+    fileUrl := FileLink 
     fileName := "master_schedule.xlsx"
 
     fmt.Println("Downloading file...")
-      err := DownloadFile(FileLink, fileUrl)
+      err := DownloadFile(fileName, fileUrl)
       if err != nil {
           panic(err)
       }
